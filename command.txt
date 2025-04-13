@@ -1,0 +1,27 @@
+sudo dnf install epel-release -y
+sudo dnf install supervisor -y
+
+sudo systemctl enable supervisord
+sudo systemctl start supervisord
+
+nano /etc/supervisord.d/denterpro-worker.ini
+
+sudo systemctl status supervisord
+
+
+[program:denterpro-worker]
+process_name=%(program_name)s_%(process_num)02d
+command=php /home/denterpro/public_html/main.denterpro.com/artisan queue:work --sleep=3 --tries=3
+autostart=true
+autorestart=true
+user=denterpro
+numprocs=1
+redirect_stderr=true
+stdout_logfile=/home/denterpro/public_html/main.denterpro.com/storage/logs/laravel.log
+
+supervisorctl reread
+supervisorctl update
+supervisorctl start denterpro-worker:*
+
+
+supervisorctl status
